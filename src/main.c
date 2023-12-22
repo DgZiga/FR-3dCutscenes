@@ -130,7 +130,8 @@ u32 calc_char_start(struct BgConfig *bg_cfg){
     return ADDR_VRAM + (bg_cfg->character_base*0x4000);
 }
 
-void load_asset_to_bg(struct asset asset, u8 bgid, u8 pal_id){
+void load_asset_to_bg(struct asset asset, u8 bgid){
+    u8 pal_id = bgid; //just convenient
     struct BgConfig *bg_cfg = get_bg_config_by_bg_id(bgid);
     void *buffer = malloc(0x1000);
     gpu_pal_apply_compressed((void *)(asset.pals), pal_id * 16, 32);
@@ -149,21 +150,10 @@ void gui_handler(){
             if (!pal_fade_control.active) {
 				setup(); 					//clear all graphics
 				rboxes_free(); 				//clear rboxes
-                //for(u8 i=0; i<4; i++){      //config bgs independently of their previous state
-                //    bgid_mod_x_offset(i, 0, 0);	
-                //    bgid_mod_y_offset(i, 0, 0);
-				//    gpu_tile_bg_drop_all_sets(i);
-				//    gpu_sync_bg_hide(i);	
-                //}
 				bg_vram_setup(0, bg_config, 4);
 				//Clear VRAM
 				u32 set = 0;
 				CpuFastSet((void*)&set, (void*)ADDR_VRAM, CPUModeFS(0x10000, CPUFSSET));
-				//Hide BGs
-				//gpu_sync_bg_hide(0);	
-				//gpu_sync_bg_hide(1);
-				//gpu_sync_bg_hide(2);	
-				//gpu_sync_bg_hide(3);
 				//Set callbacks
 				set_callback2(c2_gui);
 				vblank_handler_set(vblank_cb_spq);
@@ -174,10 +164,10 @@ void gui_handler(){
 			break;
 		case 1: { //Load backgground image, init rboxes and quest list
 			//Load bg image
-			load_asset_to_bg(bg0_0_asset, 0, 0);
-			load_asset_to_bg(bg1_0_asset, 1, 1);
-			load_asset_to_bg(bg2_0_asset, 2, 2);
-			load_asset_to_bg(bg3_0_asset, 3, 3);
+			load_asset_to_bg(bg0_0_asset, 0);
+			load_asset_to_bg(bg1_0_asset, 1);
+			load_asset_to_bg(bg2_0_asset, 2);
+			load_asset_to_bg(bg3_0_asset, 3);
 			//init rboxes
 			//rbox_init_from_templates(def.textboxes);
 			
