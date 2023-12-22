@@ -37,15 +37,15 @@ int main(){
 }
 
 //char_base is multiplied by 0x4000 and added to 0x06000000. 
-//map_base is multiplied by 0x800 and added to 0x05FFA000.
+//map_base is multiplied by 0x800 and added to 0x06000000.
 //size: 0 is 256x256, 1 is 512x256
 //priority: 0-3, 0 is higher
 //palette: 0 (16) or 1(256)
 struct BgConfig bg_config[4] = { 
-    {.padding=0, .b_padding=0, .priority=3, .palette=0, .size=0, .map_base=6/*0x*/, .character_base=0/*0x04000*/, .bgid=0, }, 
-    {.padding=0, .b_padding=0, .priority=2, .palette=0, .size=0, .map_base=14/*0x*/, .character_base=1/*0x08000*/, .bgid=1, }, 
-    {.padding=0, .b_padding=0, .priority=1, .palette=0, .size=0, .map_base=22/*0x*/, .character_base=2/*0x0C000*/, .bgid=2, }, 
-    {.padding=0, .b_padding=0, .priority=0, .palette=0, .size=0, .map_base=30/*0x*/, .character_base=3/*0x10000*/, .bgid=3, } };
+    {.padding=0, .b_padding=0, .priority=3, .palette=0, .size=0, .map_base=6 /* 6 = 0x03000*/, .character_base=0/*0x04000*/, .bgid=0, }, 
+    {.padding=0, .b_padding=0, .priority=2, .palette=0, .size=0, .map_base=14/*14 = 0x0A000*/, .character_base=1/*0x08000*/, .bgid=1, }, 
+    {.padding=0, .b_padding=0, .priority=1, .palette=0, .size=0, .map_base=22/*22 = 0x11000*/, .character_base=2/*0x0C000*/, .bgid=2, }, 
+    {.padding=0, .b_padding=0, .priority=0, .palette=0, .size=0, .map_base=30/*30 = 0x18000*/, .character_base=3/*0x10000*/, .bgid=3, } };
 
 struct BgConfig *get_bg_config_by_bg_id(u8 bgid){
     for (u8 i=0; i<sizeof(bg_config)/sizeof(bg_config[0]); i++){
@@ -141,6 +141,7 @@ void load_asset_to_bg(struct asset asset, u8 bgid){
     bgid_mark_for_sync(bgid);
     gpu_sync_bg_show(bgid);
 }
+void task_scroll(u8 task_id);
 
 void gui_handler(){
 	struct FadeControl pal_fade_control = *((struct FadeControl *)0x02037ab8);
@@ -175,6 +176,7 @@ void gui_handler(){
 		}
 			break;
 		case 2: //fill rboxes
+        
             if (!pal_fade_control.active) { //Wait for fadescreen to stop
 				// clean boxes
 				for (u32 i = 0; i < 5; ++i) {
@@ -188,13 +190,50 @@ void gui_handler(){
 		}
 		case 4: // Show screen
             fade_screen(0xFFFFFFFF, 0, 16, 0, 0x0000);
-			//gpu_sync_bg_show(0);
-			//gpu_sync_bg_show(1);
             super.multi_purpose_state_tracker++;
 			break;
+        case 5: //Input control NOTE: L and R ARE INVERTED IN POKEAGB
+        if (!pal_fade_control.active) { //Wait for fadescreen to end
+            switch (super.buttons_new_remapped) {
+                case KEY_SELECT:
+                    break;
+                case KEY_R:
+                    break;
+                case KEY_L: 
+                    break;
+                case KEY_B:
+                    audio_play(SOUND_GENERIC_CLINK);
+                    return;
+                case KEY_DOWN:
+                    ; //empty statement for C compiler
+                    u8 task_id = task_add((TaskCallback)(task_scroll), 0);
+                    tasks[task_id].priv[0] = 0; //bgid
+                    tasks[task_id].priv[1] = 100; //delta
+                    tasks[task_id].priv[2] = 1; //mode
+                    break;
+                case KEY_UP:
+	                bgid_mod_y_offset(0, 5, 2);
+                    break;
+                case KEY_LEFT:
+	                bgid_mod_x_offset(0, 5, 1);
+                    break;
+                case KEY_RIGHT:
+	                bgid_mod_x_offset(0, 5, 2);
+                    break;
+            };
+        }
+        break;
 	}
 	
 	
+}
+
+void task_scroll(u8 task_id){
+    struct Task curr_task = tasks[task_id];
+    u8 bgid = curr_task.priv[0];
+    u8 delta = curr_task.priv[1];
+    u8 mode = curr_task.priv[2];
+    bgid_mod_y_offset(bgid, delta, mode);
 }
 
 #endif

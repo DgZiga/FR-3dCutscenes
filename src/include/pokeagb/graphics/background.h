@@ -143,12 +143,18 @@ POKEAGB_EXTERN void overworld_free_bgmaps(void);
 POKEAGB_EXTERN void textbox_something(void);
 
 /**
- * @address{BPRE,08001D08}
+ * @address{BPRE,08001D08} dir:
+ * 0 = override
+ * 1 = add
+ * 2 = sub
  */
 POKEAGB_EXTERN void bgid_mod_y_offset(u8 bgid, s32 delta, u8 dir);
 
 /**
- * @address{BPRE,08001B90}
+ * @address{BPRE,08001B90} dir:
+ * 0 = override
+ * 1 = add
+ * 2 = sub
  */
 POKEAGB_EXTERN void bgid_mod_x_offset(u8 bgid, s32 delta, u8 dir);
 
