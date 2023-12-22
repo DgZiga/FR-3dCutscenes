@@ -7,6 +7,9 @@ import hashlib
 import subprocess
 import sys
 
+os.system("python config.py")
+os.system("python scripts/timeline.py")
+
 PATH = 'C:/devkitPro/devkitARM/bin'
 PREFIX = '/arm-none-eabi-'
 AS = (PATH + PREFIX + 'as')
@@ -14,6 +17,7 @@ CC = (PATH + PREFIX + 'gcc')
 LD = (PATH + PREFIX + 'ld')
 OBJCOPY = (PATH + PREFIX + 'objcopy')
 ROOT = './'
+SRC = ROOT+'src/'
 BUILT_GRAPHICS = './src/built_graphics'
 BUILD = './build'
 ASFLAGS = ['-mthumb']
@@ -28,7 +32,9 @@ GRITFLAGS=['-gB4',      #4bpp
            '-pu8',      #pal is u8 array
            '-mzl',      #map is lz77 compressed
            '-mR4',      #
+           #'-pT0',      #palette #0 is trasparency
            '-aw256',    #area width is 256
+           '-gTFF0000', #rgb(255,0,0) (#0xFF0000) is trasparency
            '-ftc']      #file_type: c
  
 def run_command(cmd):
@@ -59,14 +65,28 @@ def process_c(in_file):
     run_command(cmd)
     return out_file
  
-def process_img(in_file):
+from string import Template
+
+def process_img(in_file, frame_data):
     '''Compile IMGs'''
+
+    # populate frame_data
+    filename = os.path.splitext(os.path.basename(in_file))[0][2:]
+    bgid = filename.split('_')[0]
+    frame_start = filename.split('_')[1]
+    frame_data.append({
+        'bgid':bgid,
+        'frame_start':frame_start
+    })
+
     # imgs are first converted to .c/.h files, then built like the rest of the source code
     out_file = os.path.join(os.path.dirname(in_file), '..', 'built_graphics', os.path.basename(in_file))
 
     print('Running Grit on '+os.path.abspath(out_file))
-    cmd = ['grit', in_file, '-o', out_file] + GRITFLAGS
+    cmd = ['grit', in_file, '-o', out_file, '-mp'+bgid] + GRITFLAGS
     run_command(cmd)
+
+
     return out_file
  
 def link(objects):
@@ -118,10 +138,23 @@ def main():
         './**/*.bmp'
     }
 
+    frame_data =[]
+
     for globstr in img_globs:
         files = glob(os.path.join(ROOT, globstr), recursive=True)
         for file in files:
-            process_img(file)
+            process_img(file, frame_data)
+
+    #create frame_data c files from populated frame_data variable
+    timeline = []
+    for frame in frame_data:
+        timeline_slice = 0
+        for timeline_frame in timeline:
+            if timeline_frame.start == frame.frame_start:
+                timeline_slice = timeline_frame
+                break
+        if timeline_slice == 0:
+            timeline_slice
 
     globs = {
         '**/*.c': process_c
