@@ -1,13 +1,15 @@
 #ifndef MAIN_C
 #define MAIN_C
 
-#include "config.h"
+#include "config/config.h"
 #include "include/animation_state/animation_state.h"
 #include "include/setup/setup.h"
 #include <pokeagb/pokeagb.h>
 
 void c2_animation();
 void exit_anim();
+
+POKEAGB_EXTERN void run_eventually_start(u8 task_id);
 
 int main(){
     fade_screen(0xFFFFFFFF, 0, 0, 16, 0x0000);
@@ -16,6 +18,22 @@ int main(){
     super.multi_purpose_state_tracker = 0;
 	return 1;
 }
+
+#define BY_ITEM(id)  \
+void gui_##id##_by_item_run_eventually(){\
+	main();\
+}\
+void gui_##id##_by_item_task(u8 task_id){\
+	c2_exit_to_overworld_2_switch();\
+	*run_eventually = gui_##id##_by_item_run_eventually;\
+	run_eventually_start(task_id);\
+}\
+void gui_##id##_new_gui_by_item(){\
+	task_add(gui_##id##_by_item_task, 0); \
+}
+
+
+BY_ITEM(1);
 
 void main_c1_handler(){
 	struct FadeControl pal_fade_control = *((struct FadeControl *)0x02037ab8);

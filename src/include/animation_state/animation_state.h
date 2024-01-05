@@ -2,7 +2,7 @@
 #define ANIMATION_STATE_H
 
 #include <pokeagb/types.h>
-#include "../config.h"
+#include "../config/config.h"
 
 struct animation_state {
     u32 curr_frame;

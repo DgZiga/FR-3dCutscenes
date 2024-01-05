@@ -69,10 +69,10 @@ def process_img(in_file, frame_data):
     filename = os.path.splitext(os.path.basename(in_file))[0][2:]
     bgid = filename.split('_')[0]
     frame_start = filename.split('_')[1]
-    frame_data.append({
-        'bgid':bgid,
-        'frame_start':frame_start
-    })
+    frame_data.append(dict(
+        bgid=bgid,
+        frame_start=int(frame_start)
+    ))
 
     # imgs are first converted to .c/.h files, then built like the rest of the source code
     out_file = os.path.join(os.path.dirname(in_file), '..', 'built_graphics', os.path.basename(in_file))
@@ -108,6 +108,8 @@ def clear_folder(foldername):
         os.remove(f)
 
  
+from string import Template
+
 def main():
     if len(sys.argv) < 2:
         print("No custom address for the compiled code has been set.")
@@ -140,16 +142,66 @@ def main():
         for file in files:
             process_img(file, frame_data)
 
+    #array must be sorted by 
+    frame_data = sorted(frame_data, key=lambda x: x['frame_start']) 
+
     #create frame_data c files from populated frame_data variable
-    timeline = []
+    includes = ""
+    drawing_keyframes = "struct drawing_keyframe drawing_keyframes[] = {"
     for frame in frame_data:
-        timeline_slice = 0
-        for timeline_frame in timeline:
-            if timeline_frame.start == frame.frame_start:
-                timeline_slice = timeline_frame
-                break
-        if timeline_slice == 0:
-            timeline_slice
+        drawing_keyframes += Template("""{  
+            .bgid=$bgid,
+            .asset=ASSET($bgid,$frame_start),
+            .frame_start=$frame_start
+        },""").substitute(frame)
+        includes += Template("""#include "../built_graphics/bg${bgid}_${frame_start}.h"
+""").substitute(frame)
+    drawing_keyframes+="END_DRAWING_FRAME};"
+
+    body = dict(body=includes+drawing_keyframes)
+    config_c_contents = Template("""
+#ifndef CONFIG_C
+#define CONFIG_C
+
+#include "config.h"
+
+$body
+
+#endif
+""").substitute(body)
+
+    config_c = open("src/config/config.c", "w")
+    config_c.write(config_c_contents)
+    config_c.close()
+    
+#struct drawing_keyframe drawing_keyframes[] = {
+#    {
+#        .bgid=0,
+#        .asset=ASSET(0,0),
+#        .frame_start=0
+#    },
+#    {
+#        .bgid=1,
+#        .asset=ASSET(1,0),
+#        .frame_start=0
+#    },
+#    {
+#        .bgid=2,
+#        .asset=ASSET(2,0),
+#        .frame_start=0
+#    },
+#    {
+#        .bgid=3,
+#        .asset=ASSET(3,0),
+#        .frame_start=0
+#    },
+#    {
+#        .bgid=2,
+#        .asset=ASSET(2,60),
+#        .frame_start=180
+#    },
+#    END_DRAWING_FRAME
+#};
 
     globs = {
         '**/*.c': process_c
