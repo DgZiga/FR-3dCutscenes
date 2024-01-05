@@ -1,31 +1,51 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#include "structs/frame_data.h"
-#include "structs/scroll_data.h" 
-#include "structs/timeline_frame.h" 
 #include "assets.h" 
-#include "timeline.h" 
+#include "include/animation_utils/animation_utils.h" 
 
-#define TIMELINE_SIZE 10
-#define SCENE_LEN 2
 
-ASSET(0,0)
+#define ANIMATION_STATE_ADDR 0x0202402C //default 0x0202402C: opponents party
+#define ANIMATION_LEN 181 //in frames
+
+//ASSET(0,0)
+const struct asset bg0_0_asset ={ .tiles_len = 728, .tiles = bg0_0Tiles, .map_len = 464, .map = bg0_0Map, .pals_len = 20, .pals = bg0_0Pal, };
+
 ASSET(1,0)
 ASSET(2,0)
 ASSET(3,0)
 
-struct frame_data bg_0_frame_data[] = {{.frame_id= 0, .start=0}};
-struct frame_data bg_1_frame_data[] = {{.frame_id= 0, .start=0}};
-struct frame_data bg_2_frame_data[] = {{.frame_id= 0, .start=0}};
-struct frame_data bg_3_frame_data[] = {{.frame_id= 0, .start=0}};
-
-struct scroll_data bg_0_scroll_data[] = {{.start=0, .direction=UP   , .speed=5}};
-struct scroll_data bg_1_scroll_data[] = {{.start=0, .direction=DOWN , .speed=5}};
-struct scroll_data bg_2_scroll_data[] = {{.start=0, .direction=LEFT , .speed=5}};
-struct scroll_data bg_3_scroll_data[] = {{.start=0, .direction=RIGHT, .speed=5}};
+struct scrolling_keyframe scrolling_keyframes[];
 
 
 
+struct drawing_keyframe drawing_keyframes[] = {
+    {
+        .bgid=0,
+        .asset=ASSET2(0,0),
+        .frame_start=0
+    },
+    {
+        .bgid=1,
+        .asset=ASSET2(1,0),
+        .frame_start=0
+    },
+    {
+        .bgid=2,
+        .asset=ASSET2(2,0),
+        .frame_start=0
+    },
+    {
+        .bgid=3,
+        .asset=ASSET2(3,0),
+        .frame_start=0
+    },
+    {
+        .bgid=2,
+        .asset=ASSET2(2,60),
+        .frame_start=180
+    },
+    END_DRAWING_FRAME
+};
 
 #endif

@@ -5,6 +5,7 @@
 #include "built_graphics/bg0_0.h"
 #include "built_graphics/bg1_0.h"
 #include "built_graphics/bg2_0.h"
+#include "built_graphics/bg2_60.h"
 #include "built_graphics/bg3_0.h"
 
 struct asset {
@@ -16,15 +17,27 @@ struct asset {
     const u8 *pals;
 };
 
-#define ASSET(bgid, frameid) \
-struct asset bg##bgid##_##frameid##_asset ={ \
-    .tiles_len = bg##bgid##_##frameid##TilesLen, \
-    .tiles = bg##bgid##_##frameid##Tiles, \
-    .map_len = bg##bgid##_##frameid##MapLen, \
-    .map = bg##bgid##_##frameid##Map, \
-    .pals_len = bg##bgid##_##frameid##PalLen, \
-    .pals = bg##bgid##_##frameid##Pal, \
+#define ASSET_NAME(bgid, framestart) bg##bgid##_##framestart##_asset
+
+#define ASSET(bgid, framestart) \
+struct asset bg##bgid##_##framestart##_asset ={ \
+    .tiles_len = bg##bgid##_##framestart##TilesLen, \
+    .tiles = bg##bgid##_##framestart##Tiles, \
+    .map_len = bg##bgid##_##framestart##MapLen, \
+    .map = bg##bgid##_##framestart##Map, \
+    .pals_len = bg##bgid##_##framestart##PalLen, \
+    .pals = bg##bgid##_##framestart##Pal, \
 };
 
+
+#define ASSET2(bgid, framestart) \
+(struct asset){ \
+    .tiles_len = bg##bgid##_##framestart##TilesLen, \
+    .tiles = bg##bgid##_##framestart##Tiles, \
+    .map_len = bg##bgid##_##framestart##MapLen, \
+    .map = bg##bgid##_##framestart##Map, \
+    .pals_len = bg##bgid##_##framestart##PalLen, \
+    .pals = bg##bgid##_##framestart##Pal, \
+}
 
 #endif

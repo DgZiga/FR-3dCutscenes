@@ -23,7 +23,7 @@ BUILD = './build'
 ASFLAGS = ['-mthumb']
 LDFLAGS = ['-z','muldefs','-T', 'linker.ld', '-T', 'BPRE.ld', '-r']
 CFLAGS= ['-Isrc/include', '-mthumb', '-mno-thumb-interwork', '-mcpu=arm7tdmi',
-         '-fno-inline', '-mlong-calls', '-march=armv4t', '-fno-builtin', '-Wall', '-O2']
+         '-fno-inline', '-mlong-calls', '-march=armv4t', '-fno-builtin', '-Wall', '-O2', '-std=c11']
 GRITFLAGS=['-gB4',      #4bpp
            '-gzl',      #tileset is lz77 compressed
            '-pzl',      #pal is lz77 compressed
@@ -32,7 +32,6 @@ GRITFLAGS=['-gB4',      #4bpp
            '-pu8',      #pal is u8 array
            '-mzl',      #map is lz77 compressed
            '-mR4',      #
-           #'-pT0',      #palette #0 is trasparency
            '-aw256',    #area width is 256
            '-gTFF0000', #rgb(255,0,0) (#0xFF0000) is trasparency
            '-ftc']      #file_type: c

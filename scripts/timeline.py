@@ -6,7 +6,7 @@ class Timeline:
     def add_frame_data(self, frame_data):
         for frame in frame_data:
             timeline_frame = self.get_timeline_frame_data_for_start(frame.frame_start)
-        
+            timeline_frame.add_function
     
     def get_timeline_frame_data_for_start(self, start):
         for frame in self.timeline_frames:

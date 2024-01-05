@@ -2,7 +2,7 @@
 #define MAIN_C
 
 #include "config.h"
-#include "timeline.h"
+#include "include/animation_state/animation_state.h"
 #include <pokeagb/pokeagb.h>
 
 int main();
@@ -36,25 +36,6 @@ int main(){
 	return 1;
 }
 
-//char_base is multiplied by 0x4000 and added to 0x06000000. 
-//map_base is multiplied by 0x800 and added to 0x06000000.
-//size: 0 is 256x256, 1 is 512x256
-//priority: 0-3, 0 is higher
-//palette: 0 (16) or 1(256)
-struct BgConfig bg_config[4] = { 
-    {.padding=0, .b_padding=0, .priority=3, .palette=0, .size=0, .map_base=6 /* 6 = 0x03000*/, .character_base=0/*0x04000*/, .bgid=0, }, 
-    {.padding=0, .b_padding=0, .priority=2, .palette=0, .size=0, .map_base=14/*14 = 0x0A000*/, .character_base=1/*0x08000*/, .bgid=1, }, 
-    {.padding=0, .b_padding=0, .priority=1, .palette=0, .size=0, .map_base=22/*22 = 0x11000*/, .character_base=2/*0x0C000*/, .bgid=2, }, 
-    {.padding=0, .b_padding=0, .priority=0, .palette=0, .size=0, .map_base=30/*30 = 0x18000*/, .character_base=3/*0x10000*/, .bgid=3, } };
-
-struct BgConfig *get_bg_config_by_bg_id(u8 bgid){
-    for (u8 i=0; i<sizeof(bg_config)/sizeof(bg_config[0]); i++){
-        if(bg_config[i].bgid == bgid){
-            return &bg_config[i];
-        }
-    }
-    return &bg_config[5]; //break everything on purpose TODO handle this case
-}
 
 #define CPUFSCPY 0
 #define CPUFSSET 1
@@ -111,7 +92,36 @@ void setup()
     tasks_init();
 }
 
+#include "include/agb_debug/debug.c"
+
 void c2_gui(){
+
+    //do animation
+    if(animation_state->started && !animation_state->ended){
+        //dprintf("animating frame %x\n", animation_state->curr_frame);
+        
+        //process drawing
+        struct drawing_keyframe *drawing_keyframe = &(drawing_keyframes[animation_state->curr_drawing_keyframe_i]);
+        while(drawing_keyframe->frame_start == animation_state->curr_frame){
+            //dprintf("drawing keyframe with index %x. (keyframe start is\n", animation_state->curr_drawing_keyframe_i);
+            
+            load_asset_to_bg(*drawing_keyframe);
+            animation_state->curr_drawing_keyframe_i++;
+            drawing_keyframe = &(drawing_keyframes[animation_state->curr_drawing_keyframe_i]);
+        }
+        //process scroll
+        struct scrolling_keyframe scrolling_keyframe = scrolling_keyframes[animation_state->curr_scrolling_keyframe_i];
+        if(scrolling_keyframe.frame_start == animation_state->curr_frame){
+            start_scroll(scrolling_keyframe);
+            animation_state->curr_scrolling_keyframe_i++;
+        }
+        animation_state->curr_frame++;
+
+        if(animation_state->curr_frame > ANIMATION_LEN){
+            animation_state->ended = true;
+        }
+    }
+
     obj_sync_superstate();
     objc_exec();
     process_palfade();
@@ -126,23 +136,6 @@ void vblank_cb_spq(){
 	gpu_pal_upload();
 }
 
-u32 calc_char_start(struct BgConfig *bg_cfg){
-    return ADDR_VRAM + (bg_cfg->character_base*0x4000);
-}
-
-void load_asset_to_bg(struct asset asset, u8 bgid){
-    u8 pal_id = bgid; //just convenient
-    struct BgConfig *bg_cfg = get_bg_config_by_bg_id(bgid);
-    void *buffer = malloc(0x1000);
-    gpu_pal_apply_compressed((void *)(asset.pals), pal_id * 16, 32);
-    LZ77UnCompWram((void *)(asset.map), (void *)buffer);
-    lz77UnCompVram((void *)(asset.tiles), (void *)calc_char_start(bg_cfg));
-    bgid_set_tilemap(bgid, buffer);
-    bgid_mark_for_sync(bgid);
-    gpu_sync_bg_show(bgid);
-}
-void task_scroll(u8 task_id);
-
 void gui_handler(){
 	struct FadeControl pal_fade_control = *((struct FadeControl *)0x02037ab8);
 
@@ -155,6 +148,8 @@ void gui_handler(){
 				//Clear VRAM
 				u32 set = 0;
 				CpuFastSet((void*)&set, (void*)ADDR_VRAM, CPUModeFS(0x10000, CPUFSSET));
+                //Init animation_state
+                init_animation_state();
 				//Set callbacks
 				set_callback2(c2_gui);
 				vblank_handler_set(vblank_cb_spq);
@@ -165,10 +160,11 @@ void gui_handler(){
 			break;
 		case 1: { //Load backgground image, init rboxes and quest list
 			//Load bg image
-			load_asset_to_bg(bg0_0_asset, 0);
-			load_asset_to_bg(bg1_0_asset, 1);
-			load_asset_to_bg(bg2_0_asset, 2);
-			load_asset_to_bg(bg3_0_asset, 3);
+            animation_state->started = true;
+            //load_asset_to_bg(drawing_keyframes[0]);
+            //load_asset_to_bg(drawing_keyframes[1]);
+            //load_asset_to_bg(drawing_keyframes[2]);
+            //load_asset_to_bg(drawing_keyframes[3]);
 			//init rboxes
 			//rbox_init_from_templates(def.textboxes);
 			
@@ -192,48 +188,17 @@ void gui_handler(){
             fade_screen(0xFFFFFFFF, 0, 16, 0, 0x0000);
             super.multi_purpose_state_tracker++;
 			break;
-        case 5: //Input control NOTE: L and R ARE INVERTED IN POKEAGB
-        if (!pal_fade_control.active) { //Wait for fadescreen to end
-            switch (super.buttons_new_remapped) {
-                case KEY_SELECT:
-                    break;
-                case KEY_R:
-                    break;
-                case KEY_L: 
-                    break;
-                case KEY_B:
-                    audio_play(SOUND_GENERIC_CLINK);
-                    return;
-                case KEY_DOWN:
-                    ; //empty statement for C compiler
-                    u8 task_id = task_add((TaskCallback)(task_scroll), 0);
-                    tasks[task_id].priv[0] = 0; //bgid
-                    tasks[task_id].priv[1] = 100; //delta
-                    tasks[task_id].priv[2] = 1; //mode
-                    break;
-                case KEY_UP:
-	                bgid_mod_y_offset(0, 5, 2);
-                    break;
-                case KEY_LEFT:
-	                bgid_mod_x_offset(0, 5, 1);
-                    break;
-                case KEY_RIGHT:
-	                bgid_mod_x_offset(0, 5, 2);
-                    break;
-            };
+        case 5: 
+
+        if (!pal_fade_control.active) { //Wait for fadescreen to end, start animation
+            if(!animation_state->started){
+                //animation_state->started = true;
+            }
         }
         break;
 	}
 	
 	
-}
-
-void task_scroll(u8 task_id){
-    struct Task curr_task = tasks[task_id];
-    u8 bgid = curr_task.priv[0];
-    u8 delta = curr_task.priv[1];
-    u8 mode = curr_task.priv[2];
-    bgid_mod_y_offset(bgid, delta, mode);
 }
 
 #endif
