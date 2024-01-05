@@ -15,6 +15,8 @@ struct scrolling_keyframe {
     enum axis axis;
 };
 
+#define END_SCROLLING_FRAME {.frame_start = 0xFFFFFFFF}
+
 void start_scroll(struct scrolling_keyframe scrolling_keyframe);
 
 #endif

@@ -103,17 +103,17 @@ void c2_gui(){
         //process drawing
         struct drawing_keyframe *drawing_keyframe = &(drawing_keyframes[animation_state->curr_drawing_keyframe_i]);
         while(drawing_keyframe->frame_start == animation_state->curr_frame){
-            //dprintf("drawing keyframe with index %x. (keyframe start is\n", animation_state->curr_drawing_keyframe_i);
-            
             load_asset_to_bg(*drawing_keyframe);
             animation_state->curr_drawing_keyframe_i++;
             drawing_keyframe = &(drawing_keyframes[animation_state->curr_drawing_keyframe_i]);
         }
+
         //process scroll
-        struct scrolling_keyframe scrolling_keyframe = scrolling_keyframes[animation_state->curr_scrolling_keyframe_i];
-        if(scrolling_keyframe.frame_start == animation_state->curr_frame){
-            start_scroll(scrolling_keyframe);
+        struct scrolling_keyframe *scrolling_keyframe = &(scrolling_keyframes[animation_state->curr_scrolling_keyframe_i]);
+        while(scrolling_keyframe->frame_start == animation_state->curr_frame){
+            start_scroll(*scrolling_keyframe);
             animation_state->curr_scrolling_keyframe_i++;
+            scrolling_keyframe = &(scrolling_keyframes[animation_state->curr_scrolling_keyframe_i]);
         }
         animation_state->curr_frame++;
 
