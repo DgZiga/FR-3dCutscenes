@@ -6,6 +6,9 @@
 #include "include/setup/setup.h"
 #include <pokeagb/pokeagb.h>
 
+void c2_animation();
+void exit_anim();
+
 int main(){
     fade_screen(0xFFFFFFFF, 0, 0, 16, 0x0000);
     void main_c1_handler(void);
@@ -14,24 +17,47 @@ int main(){
 	return 1;
 }
 
-POKEAGB_EXTERN void run_eventually_start(u8 task_id);
+void main_c1_handler(){
+	struct FadeControl pal_fade_control = *((struct FadeControl *)0x02037ab8);
 
-#define BY_ITEM(id)  \
-void gui_##id##_by_item_run_eventually(){\
-	main();\
-}\
-void gui_##id##_by_item_task(u8 task_id){\
-	c2_exit_to_overworld_2_switch();\
-	*run_eventually = gui_##id##_by_item_run_eventually;\
-	run_eventually_start(task_id);\
-}\
-void gui_##id##_new_gui_by_item(){\
-	task_add(gui_##id##_by_item_task, 0);\
+	switch(super.multi_purpose_state_tracker){
+		case 0:
+            if (!pal_fade_control.active) {
+				setup(); 					//clear all graphics
+				rboxes_free(); 				//clear rboxes
+				bg_vram_setup(0, bg_config, 4);
+				//Clear VRAM
+				u32 set = 0;
+				CpuFastSet((void*)&set, (void*)ADDR_VRAM, CPUModeFS(0x10000, CPUFSSET));
+                //Init animation_state
+                init_animation_state();
+				//Set callbacks
+				set_callback2(c2_animation);
+				vblank_handler_set(vblank_cb_spq);
+				set_callback1(main_c1_handler);
+				
+				super.multi_purpose_state_tracker++;;
+			}
+			break;
+		case 1: //show screen
+            fade_screen(0xFFFFFFFF, 0, 16, 0, 0x0000);
+            super.multi_purpose_state_tracker++;
+			break;
+		case 2:  //Start animation
+            animation_state->started = true;
+			super.multi_purpose_state_tracker++;
+			break;
+        case 3: 
+            if (animation_state->ended) { 
+                set_callback1(exit_anim);
+                super.multi_purpose_state_tracker = 0;
+                return;
+            }
+            break;
+	}
+	
 }
 
-BY_ITEM(1);
-
-#include "include/agb_debug/debug.c"
 
 void c2_animation(){
     //do animation
@@ -90,48 +116,6 @@ void exit_anim() {
 			super.multi_purpose_state_tracker++;
 		break;
 	}
-}
-
-void main_c1_handler(){
-	struct FadeControl pal_fade_control = *((struct FadeControl *)0x02037ab8);
-
-	switch(super.multi_purpose_state_tracker){
-		case 0:
-            if (!pal_fade_control.active) {
-				setup(); 					//clear all graphics
-				rboxes_free(); 				//clear rboxes
-				bg_vram_setup(0, bg_config, 4);
-				//Clear VRAM
-				u32 set = 0;
-				CpuFastSet((void*)&set, (void*)ADDR_VRAM, CPUModeFS(0x10000, CPUFSSET));
-                //Init animation_state
-                init_animation_state();
-				//Set callbacks
-				set_callback2(c2_animation);
-				vblank_handler_set(vblank_cb_spq);
-				set_callback1(main_c1_handler);
-				
-				super.multi_purpose_state_tracker++;;
-			}
-			break;
-		case 1: //show screen
-            fade_screen(0xFFFFFFFF, 0, 16, 0, 0x0000);
-            super.multi_purpose_state_tracker++;
-			break;
-		case 2:  //Start animation
-            animation_state->started = true;
-			super.multi_purpose_state_tracker++;
-			break;
-        case 3: 
-            if (animation_state->ended) { 
-                set_callback1(exit_anim);
-                super.multi_purpose_state_tracker = 0;
-                return;
-            }
-            break;
-	}
-	
-	
 }
 
 #endif
