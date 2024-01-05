@@ -12,28 +12,28 @@ struct scrolling_keyframe scrolling_keyframes[] = {
         .bg_id=0,
         .frame_start = 0,
         .axis=X,
-        .speed=1<<2,
+        .speed=1,
         .distance=0,
         .scroll_mode=ADD
     }, {
         .bg_id=1,
-        .frame_start = 60,
+        .frame_start = 0,
         .axis=X,
-        .speed=1<<4,
+        .speed=1<<3,
         .distance=0,
         .scroll_mode=ADD
     }, {
         .bg_id=2,
-        .frame_start = 120,
+        .frame_start = 0,
         .axis=X,
-        .speed=1<<6,
+        .speed=1<<5,
         .distance=0,
         .scroll_mode=ADD
     }, {
         .bg_id=3,
-        .frame_start = 180,
+        .frame_start = 0,
         .axis=X,
-        .speed=1<<8,
+        .speed=1<<7,
         .distance=0,
         .scroll_mode=ADD
     },
