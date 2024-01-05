@@ -7,9 +7,6 @@ import hashlib
 import subprocess
 import sys
 
-os.system("python config.py")
-os.system("python scripts/timeline.py")
-
 PATH = 'C:/devkitPro/devkitARM/bin'
 PREFIX = '/arm-none-eabi-'
 AS = (PATH + PREFIX + 'as')
@@ -47,7 +44,6 @@ def make_output_file(filename):
     '''Return hash of filename to use as object filename'''
     m = hashlib.md5()
     m.update(filename.encode())
-    #print("AAAAAAAAAAAAAAA " + filename + " = " + m.hexdigest())
     return os.path.join(BUILD, m.hexdigest() + '.o')
  
 def process_assembly(in_file):
