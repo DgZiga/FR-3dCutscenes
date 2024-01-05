@@ -22,6 +22,17 @@ To configure the scrolling behaviour, modify the `scrolling_keyframes` array.  T
 - `axis`: either X or Y, pretty self explanatory
 - `scroll_mode`: can be ADD, SUB, or SET. ADD/SUB will add or subtract the speed to the current scroll each frame, SET will just set the value put in the `speed` field as the current scroll distance.
 
+# How to use
+This tool requires:
+- python (tested with 3.8.3)
+- [grit](https://www.coranac.com/projects/grit/) 0.8.6+
+- [devkitARM](https://devkitpro.org/wiki/devkitARM)
+
+Once you have all the necessary software installed and ready to go, just navigate to the root of this project and copy/paste your ROM there. Rename the file to `BPRE0.gba`.  
+Open the terminal, navigate to the root of the project, then run `python scripts/build.py 0xFFFFFFFF`, where `0xFFFFFFFF` is the free space in your ROM, and the script should insert everything, creating two new files:
+- `multi.gba`: the updated ROM
+- `symbols.txt`: a text file containing all the addresses known to the compiler. Conserve this file to know where everything in your ROM was inserted
+
 # Internals
 This is more like a handy to-do list for me to follow, but if you're curious:
 - the images must be compiled into C arrays of pals, tilesets, and tilemaps (there is probably a much better way where many similar images can share a single tileset)
