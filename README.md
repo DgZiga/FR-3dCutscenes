@@ -5,55 +5,42 @@ A C engine to display 3d-looking cutscenes
 This tool can take any number of images and draw them onto the 4 backgrounds, offering different scrolling speeds for each background to simulate a 3d effect.  
 
 The images must follow this naming convention:  
-`BG{bg_id}_{frame_id}.png`  
-where `bg_id` is the id of the background this particular image will be drawn on, and `frame_id` is a unique identifier of this frame within this background.
+`bg{bg_id}_{frame_start}.png`  
+where `bg_id` is the id of the background this particular image will be drawn on, and `frame_start` identifies when the picture will be drawn on screen.  
+Assuming a stable 60FPS, `bg0_120.png` will be drawn on background #0 (the "lowest" one) after roughly 2 seconds.
 
 # Internals
 This is more like a handy to-do list for me to follow, but if you're curious:
 - the images must be compiled into C arrays of pals, tilesets, and tilemaps (there is probably a much better way where many similar images can share a single tileset)
-- for each background there have to be 2 data structures:
-  - a `frame_data` struct, that maps the start time of frames to their `frame_id`.
-  - a `scroll_data` struct, that maps the start time of the scrolling with their data (speed and direction)
-- from these structures, the code must:
-  - compile a timeline by taking the `frame_data` and the `scroll_data` maps and sorting them by their keys
-  - init the backgrounds to the frame 0 images, also init an internal structure that contains the `curr_frame_id` and the `curr_actions_to_do`
-  - start a c2 loop that is called frame by frame and check the timeline for updates
-    - if there are any updates, update the `curr_actions_to_do`
-    - do any actions listed in `curr_actions_to_do`
+- the user can configure 2 distinct arrays:
+  - `drawing_keyframes`, containing an ordered list of pictures, which bg they belong to, and when to draw them
+  - `scrolling_keyframes`, containing an ordered list of scrolling data, which bg they belong to, and when to apply them
+- from these arrays, the code must:
+  - init an internal structure that will serve as the animation state
+  - start a c2 loop that is called frame by frame and checks the keyframe arrays for updates
+    - if there are any updates, apply the scroll or draw the image
     - increment `curr_frame_id`
   - end the loop after a configurable `animation_duration`
 
- idea of `frame_data`:
+ `drawing_keyframes` is an array of `drawing_keyframe`:
  ```C
-struct frame_data {
-  u32 start;
-  u32 frame_id; 
-}
-
-struct frame_data bg0_frame_data[] = //...
+struct drawing_keyframe {
+    u32 frame_start;
+    u8 bgid;
+    struct asset asset; //compiled by the macro ASSET(bgid, framestart)
+};
 ```
+ `drawing_keyframes` **must** be terminated by an `END_DRAWING_FRAME`
 
- idea of `scroll_data`:
+ `scrolling_keyframes` is an array of  `scrolling_keyframe`:
  ```C
-struct scroll_data {
-  u32 start;
-  u32 direction;
-  u32 speed;
-}
-
-struct frame_data bg0_scroll_data[] = //...
+struct scrolling_keyframe {
+    u32 frame_start;
+    u16 bg_id;
+    u32 speed; //0xFF is a single pixel
+    u32 distance; //0xFF is a single pixel. The scrolling will stop after this distance has been reached. Set this field to 0 for infinite scrolling
+    enum scroll_mode scroll_mode; //SET, ADD, SUB
+    enum axis axis; //X, Y
+};
 ```
-
- idea of `loop_state`:
- ```C
-struct loop_state {
-  u32 curr_frame_id;
-  i32 scroll_y_speed; //positive is downward scroll, negative is upwards
-  i32 scroll_x_speed; //positive is right scroll, negative is left
-}
-
-struct loop_state *ptr_to_loop_state = malloc(sizeof(struct loop_state));
-ptr_to_loop_state->curr_frame_id = 0;
-ptr_to_loop_state->scroll_y_speed = 0;
-ptr_to_loop_state->scroll_x_speed = 0;
-```
+ `scrolling_keyframes` **must** be terminated by an `END_SCROLLING_FRAME`
