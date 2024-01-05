@@ -4,17 +4,37 @@
 #include "assets.h" 
 #include "include/animation_utils/animation_utils.h" 
 
-
 #define ANIMATION_STATE_ADDR 0x0202402C //default 0x0202402C: opponents party
-#define ANIMATION_LEN 181 //in frames
+#define ANIMATION_LEN 241 //in frames
 
 struct scrolling_keyframe scrolling_keyframes[] = {
     {
         .bg_id=0,
+        .frame_start = 0,
+        .axis=X,
+        .speed=1<<2,
+        .distance=0,
+        .scroll_mode=ADD
+    }, {
+        .bg_id=1,
         .frame_start = 60,
         .axis=X,
-        .pixel_speed=1,
-        .pixel_distance=140,
+        .speed=1<<4,
+        .distance=0,
+        .scroll_mode=ADD
+    }, {
+        .bg_id=2,
+        .frame_start = 120,
+        .axis=X,
+        .speed=1<<6,
+        .distance=0,
+        .scroll_mode=ADD
+    }, {
+        .bg_id=3,
+        .frame_start = 180,
+        .axis=X,
+        .speed=1<<8,
+        .distance=0,
         .scroll_mode=ADD
     },
     END_SCROLLING_FRAME

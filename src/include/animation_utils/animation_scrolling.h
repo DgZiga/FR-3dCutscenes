@@ -9,8 +9,10 @@ enum scroll_mode {SET, ADD, SUB};
 struct scrolling_keyframe {
     u32 frame_start;
     u16 bg_id;
-    u8 pixel_speed;
-    u8 pixel_distance;
+    //0xFF is a single pixel
+    u32 speed;
+    //0xFF is a single pixel
+    u32 distance;
     enum scroll_mode scroll_mode;
     enum axis axis;
 };

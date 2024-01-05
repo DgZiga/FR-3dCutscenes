@@ -9,9 +9,9 @@ void start_scroll(struct scrolling_keyframe scrolling_keyframe){
     u8 task_id = task_add((TaskCallback)(task_scroll), 0);
     tasks[task_id].priv[0] = scrolling_keyframe.bg_id;
 
-    //game freak routines for some reason require the number to be lsh 8
-    u32 delta = scrolling_keyframe.pixel_speed << 8;
-    u32 max_distance = scrolling_keyframe.pixel_distance << 8;
+    //game freak routines require the number to be lsh 8
+    u32 delta = scrolling_keyframe.speed;
+    u32 max_distance = scrolling_keyframe.distance;
     //pack u32 in 2 u16s
     tasks[task_id].priv[1] = delta & 0xFFFF;
     tasks[task_id].priv[2] = (delta >> 16) & 0x7FFF; //0x7FFF and not 0xFFFF to remove sign bit
