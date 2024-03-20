@@ -3,5 +3,6 @@
 
 #include "animation_bg_show.h"
 #include "animation_scrolling.h"
+#include "animation_text.h"
 
 #endif

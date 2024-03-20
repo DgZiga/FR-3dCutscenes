@@ -13,10 +13,10 @@ u32 calc_char_start(struct BgConfig *bg_cfg){
 //priority: 0-3, 0 is higher
 //palette: 0 (16) or 1(256)
 struct BgConfig bg_config[4] = { 
-    {.padding=0, .b_padding=0, .priority=3, .palette=0, .size=0, .map_base=6 /* 6 = 0x03000*/, .character_base=0/*0x04000*/, .bgid=0, }, 
-    {.padding=0, .b_padding=0, .priority=2, .palette=0, .size=0, .map_base=14/*14 = 0x0A000*/, .character_base=1/*0x08000*/, .bgid=1, }, 
-    {.padding=0, .b_padding=0, .priority=1, .palette=0, .size=0, .map_base=22/*22 = 0x11000*/, .character_base=2/*0x0C000*/, .bgid=2, }, 
-    {.padding=0, .b_padding=0, .priority=0, .palette=0, .size=0, .map_base=30/*30 = 0x18000*/, .character_base=3/*0x10000*/, .bgid=3, } };
+    {.padding=0, .b_padding=0, .priority=0, .palette=0, .size=0, .map_base=6 /* 6 = 0x03000*/, .character_base=0/*0x04000*/, .bgid=0, }, 
+    {.padding=0, .b_padding=0, .priority=1, .palette=0, .size=0, .map_base=14/*14 = 0x0A000*/, .character_base=1/*0x08000*/, .bgid=1, }, 
+    {.padding=0, .b_padding=0, .priority=2, .palette=0, .size=0, .map_base=22/*22 = 0x11000*/, .character_base=2/*0x0C000*/, .bgid=2, }, 
+    {.padding=0, .b_padding=0, .priority=3, .palette=0, .size=0, .map_base=30/*30 = 0x18000*/, .character_base=3/*0x10000*/, .bgid=3, } };
 
 struct BgConfig *get_bg_config_by_bg_id(u8 bgid){
     for (u8 i=0; i<sizeof(bg_config)/sizeof(bg_config[0]); i++){

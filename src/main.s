@@ -11,6 +11,12 @@
 .pool
 
 .org 0x08810000
+
+example_text_1:
+.string " Lorem Ipsum\nDolor sit amet",0xFF
+example_text_2:
+.string " consectetur adipiscing elit",0xFF
+
 .importobj "./build/linked.o"
 
 .close

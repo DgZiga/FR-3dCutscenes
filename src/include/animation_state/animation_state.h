@@ -8,6 +8,7 @@ struct animation_state {
     u32 curr_frame;
     u32 curr_scrolling_keyframe_i;
     u32 curr_drawing_keyframe_i;
+    u32 curr_text_keyframe_i;
     bool started;
     bool ended;
 };

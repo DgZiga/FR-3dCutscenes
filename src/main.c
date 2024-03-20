@@ -58,10 +58,21 @@ void main_c1_handler(){
 			}
 			break;
 		case 1: //show screen
+
+            if(textboxes[0].bg_id != 0xFF){
+			    gpu_pal_apply((void *)(&text_palettes), 15 * 16, 32);
+                bgid_mark_for_sync(0);
+                rbox_init_from_templates(textboxes);
+            }
+
             fade_screen(0xFFFFFFFF, 0, 16, 0, 0x0000);
             super.multi_purpose_state_tracker++;
 			break;
 		case 2:  //Start animation
+            if(textboxes[0].bg_id != 0xFF){
+                rboxid_clear_pixels(0, 0);
+                gpu_sync_bg_show(0);
+            }
             animation_state->started = true;
 			super.multi_purpose_state_tracker++;
 			break;
@@ -75,7 +86,6 @@ void main_c1_handler(){
 	}
 	
 }
-
 
 void c2_animation(){
     //do animation
@@ -95,6 +105,15 @@ void c2_animation(){
             animation_state->curr_scrolling_keyframe_i++;
             scrolling_keyframe = &(scrolling_keyframes[animation_state->curr_scrolling_keyframe_i]);
         }
+
+        //process text
+        struct text_keyframe *text_keyframe = &(text_keyframes[animation_state->curr_text_keyframe_i]);
+        while(textboxes[0].bg_id != 0xFF && text_keyframe->frame_start == animation_state->curr_frame){
+            display_text(text_keyframe);
+            animation_state->curr_text_keyframe_i++;
+            text_keyframe = &(text_keyframes[animation_state->curr_text_keyframe_i]);
+        }
+
         animation_state->curr_frame++;
 
         if(animation_state->curr_frame > ANIMATION_LEN){
@@ -111,7 +130,6 @@ void c2_animation(){
     // merge textbox and text tile maps
     remoboxes_upload_tilesets();
 }
-
 
 void exit_anim() {
     switch (super.multi_purpose_state_tracker) {
