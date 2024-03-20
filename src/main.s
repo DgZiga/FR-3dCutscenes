@@ -10,7 +10,7 @@
 .word gui_1_new_gui_by_item|1;
 .pool
 
-.org 0x08810000
+.org freespace
 
 example_text_1:
 .string " Lorem Ipsum\nDolor sit amet",0xFF
