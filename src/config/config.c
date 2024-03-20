@@ -8,7 +8,7 @@
 #include "../built_graphics/bg1_0.h"
 #include "../built_graphics/bg2_0.h"
 #include "../built_graphics/bg3_0.h"
-#include "../built_graphics/bg2_60.h"
+#include "../built_graphics/bg2_50.h"
 #include "../built_graphics/bg2_120.h"
 struct drawing_keyframe drawing_keyframes[] = {{  
             .bgid=0,
@@ -28,8 +28,8 @@ struct drawing_keyframe drawing_keyframes[] = {{
             .frame_start=0
         },{  
             .bgid=2,
-            .asset=ASSET(2,60),
-            .frame_start=60
+            .asset=ASSET(2,50),
+            .frame_start=50
         },{  
             .bgid=2,
             .asset=ASSET(2,120),

@@ -2,11 +2,6 @@
 #define ASSETS_H
 
 #include <pokeagb/types.h>
-#include "built_graphics/bg0_0.h"
-#include "built_graphics/bg1_0.h"
-#include "built_graphics/bg2_0.h"
-#include "built_graphics/bg2_60.h"
-#include "built_graphics/bg3_0.h"
 
 struct asset {
     const u32 tiles_len;
