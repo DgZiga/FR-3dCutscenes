@@ -29,12 +29,11 @@ To configure the scrolling behaviour, modify the `scrolling_keyframes` array in 
 - `scroll_mode`: can be ADD, SUB, or SET. ADD/SUB will add or subtract the speed to the current scroll each frame, SET will just set the value put in the `speed` field as the current scroll distance.
 
 ## Text
-To configure text appearing on screen, texboxes and text palettes must first be configured.
-Please note that text will always appear on background #0 (the one on top of all the others), and that background will not be available for image rendering (text can still scroll.)
+To configure text appearing on screen, texboxes and text palettes must first be configured.  
+Please note that text will always appear on background #0 (the one on top of all the others), and that background will not be available for image rendering (text can still scroll.)  
 
 ### Textboxes
 Textboxes are rectangles on the screen where text can be displayed.  
-If no textbox is configured, text rendering will be disabled, and bg #0 will be free to be used for image rendering.  
 To configure the textboxes, open the `src/config/config.h` file and look for the `textboxes[]` array. This array contains one entry for each texbox, plus an entry that marks the end of the array. The array is of type `struct TextboxTemplate`, here's a breakdown of all the fields:
 - `bg_id`: the bg on which the texbox will be drawn. As of right now, the only bg supported is 0. A record with this value set to `0xFF` is considered the entry that marks the end of the array. 
 - `x`: horizontal offset, starting from the left side of the screen. This value is multiplied by 8, i.e. a textbox with x=3 will start 24 pixels from the left side of the screen.
@@ -44,7 +43,8 @@ To configure the textboxes, open the `src/config/config.h` file and look for the
 - `pal_id`: palette id of the textbox. As of right now, the only pal supported is 0xF (15)
 - `charbase`: offset detailing where in VRAM the text will be inserted. As of right now, the only value supported is 1.
 
-Please remember to always put a record with `bg_id`=`0xFF` to mark the end of the array.
+Please remember to always put a record with `bg_id`=`0xFF` to mark the end of the array.  
+Having the first element of the array be the one with `bg_id`=`0xFF` will be interpreted as "no textbox configured", and bg #0 will be free to be used for image rendering. 
 
 ### Text color
 Text color configuration is split in two:
@@ -67,16 +67,20 @@ Please make sure to follow these rules:
 - The text has to be put after the `.string` directive and within double quotes. Special characters such as `\n` are supported.
 - The text **must** be followed by the `,0xFF` terminator, so that the game will know the string ended.
 
+Please note that sometimes, for still unknown reasons, the very first character of text will not be drawn on screen.
+
 ### Text keyframes
-Once textboxes and text colors are set up, we can modify the `text_keyframes` array to configure which text should appear when. The array must be terminated by a `END_TEXT_FRAME` entry. The array is of type `struct text_keyframe`, here's a breakdown of all the fields:
+Once textboxes and text colors are set up, we can modify the `text_keyframes` array to configure which text should appear and when.  
+The array must be terminated by a `END_TEXT_FRAME` entry.  
+The array is of type `struct text_keyframe`, here's a breakdown of all the fields:
 - `frame_start`: this is the exact same concept as seen in the images naming convention. **IMPORTANT**: The array must be sorted by this field in ascending order. This means for example that making element 0 have frame_start=120 and element 1 frame_start=60 is not supported and WILL break the animation.
 - `textbox_id`: id of the textbox on which the text will be displayed. This is effectively the position in the `textboxes[]` array, starting from 0.
 - `text`: this is the actual text to be displayed. In order to reference the text that has been inserted into the `main.s` file, just put the label name in this field 
 - `font`: to be completely honest, I have no clue what this does.
-- `x`: sets a horizontal margin within the textbox, starting from the left side of the textbox
-- `y`: sets a vertical margin within the textbox, starting from the top side of the textbox
+- `x`: sets a horizontal margin within the textbox, starting from the left side of the textbox (measured in pixels)
+- `y`: sets a vertical margin within the textbox, starting from the top side of the textbox (measured in pixels)
 - `color`: A reference to the previously defined `struct TextColor` objects
-- `speed`: An integer representing the speed at which text will be drawn. Setting a value of 0 will make the text appear instantly. Other than that, the higher the value, the slower text is displayed on screen
+- `speed`: An integer representing the speed at which text will be drawn. Setting a value of 0 will make the text appear instantly. Other than that the higher the value, the slower text is displayed on screen
 
 # How to use
 This tool requires:
