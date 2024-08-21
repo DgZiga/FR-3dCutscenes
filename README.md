@@ -38,8 +38,8 @@ To configure the textboxes, open the `src/config/config.h` file and look for the
 - `bg_id`: the bg on which the texbox will be drawn. As of right now, the only bg supported is 0. A record with this value set to `0xFF` is considered the entry that marks the end of the array. 
 - `x`: horizontal offset, starting from the left side of the screen. This value is multiplied by 8, i.e. a textbox with x=3 will start 24 pixels from the left side of the screen.
 - `y`: vertical offset, starting from the top side of the screen. This value is multiplied by 8, then 4 is added, i.e. a textbox with y=3 will start 28 (8*3+4) pixels from the top side of the screen.
-- `width`: width of the texbox, multiplied by 4.
-- `height`: height of the texbox, multiplied by 4.
+- `width`: width of the texbox, multiplied by 8 and then 1 is subtracted.
+- `height`: height of the texbox, multiplied by 8 and then 1 is subtracted.
 - `pal_id`: palette id of the textbox. As of right now, the only pal supported is 0xF (15)
 - `charbase`: offset detailing where in VRAM the text will be inserted. As of right now, the only value supported is 1.
 
