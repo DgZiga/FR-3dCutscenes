@@ -7,7 +7,13 @@ import hashlib
 import subprocess
 import sys
 
+# Default path for Windows
 PATH = 'C:/devkitPro/devkitARM/bin'
+
+# Check for the '-wsl' flag in the arguments
+if len(sys.argv) > 2 and sys.argv[2] == '-wsl':
+    PATH = '/usr/bin'
+
 PREFIX = '/arm-none-eabi-'
 AS = (PATH + PREFIX + 'as')
 CC = (PATH + PREFIX + 'gcc')
@@ -131,8 +137,8 @@ def main():
     clear_folder(BUILT_GRAPHICS)
     
     img_globs = {
-        './**/*.png',
-        './**/*.bmp'
+        './src/graphics/*.png',
+        './src/graphics/*.bmp'
     }
 
     frame_data =[]
@@ -185,7 +191,7 @@ $body
     linked = link(itertools.chain.from_iterable(objects))
     objcopy(linked)
 	
-	#ARMPIS
+	#ARMIPS
     cmd = ['armips', './src/main.s','-sym','symbols.txt', '-equ', 'freespace', customAddr]
     run_command(cmd)
     print("DONE")
