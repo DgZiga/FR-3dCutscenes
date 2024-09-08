@@ -137,8 +137,8 @@ def main():
     clear_folder(BUILT_GRAPHICS)
     
     img_globs = {
-        './**/*.png',
-        './**/*.bmp'
+        './src/graphics/*.png',
+        './src/graphics/*.bmp'
     }
 
     frame_data =[]
@@ -191,7 +191,7 @@ $body
     linked = link(itertools.chain.from_iterable(objects))
     objcopy(linked)
 	
-	#ARMPIS
+	#ARMIPS
     cmd = ['armips', './src/main.s','-sym','symbols.txt', '-equ', 'freespace', customAddr]
     run_command(cmd)
     print("DONE")
