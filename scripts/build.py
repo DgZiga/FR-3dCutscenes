@@ -7,7 +7,13 @@ import hashlib
 import subprocess
 import sys
 
+# Default path for Windows
 PATH = 'C:/devkitPro/devkitARM/bin'
+
+# Check for the '-wsl' flag in the arguments
+if len(sys.argv) > 2 and sys.argv[2] == '-wsl':
+    PATH = '/usr/bin'
+
 PREFIX = '/arm-none-eabi-'
 AS = (PATH + PREFIX + 'as')
 CC = (PATH + PREFIX + 'gcc')
