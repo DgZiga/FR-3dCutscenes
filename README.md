@@ -93,6 +93,32 @@ Open the terminal, navigate to the root of the project, then run `python scripts
 - `multi.gba`: the updated ROM
 - `symbols.txt`: a text file containing all the addresses known to the compiler. Conserve this file to know where everything in your ROM was inserted
 
+## Compiling with WSL
+Thanks to @jmynes for the addition.  
+The project can be compiled in a WSL envrionment by adding the `-wsl` flag to the `python scripts/build.py 0xFFFFFFFF` command.  
+Here is a list of commands that will install all the needed dependencies and build the project.
+```
+git clone https://github.com/DgZiga/FR-3dCutscenes.git
+cd FR-3dCutscenes
+git clone https://github.com/devkitPro/grit/
+cd grit
+sudo apt-get install autoconf automake libtool libfreeimage-dev
+./autogen.sh
+./configure
+make
+sudo make install
+git clone https://github.com/Kingcom/armips.git
+cd armips
+mkdir build
+cd build
+git submodule update --init --recursive
+cmake ..
+make
+sudo cp armips/build/armips /usr/local/bin/
+cd ../..
+python3 scripts/build.py 0x08A00000 -wsl
+```
+
 # Internals
 This is more like a handy to-do list for me to follow, but if you're curious:
 - the images must be compiled into C arrays of pals, tilesets, and tilemaps (there is probably a much better way where many similar images can share a single tileset)
